@@ -1,4 +1,4 @@
-import os, sys
+import sys
 import json
 import requests
 import pytz
@@ -10,10 +10,9 @@ DISCUSSION_REPO_OWNER = sys.argv[1]  # Discussion Repository Owner's Username
 DISCUSSION_REPOSITORY = sys.argv[2]  # Discussion Repository Name
 ISSUE_REPO_OWNER = sys.argv[3]  # Issue Repository Owner's Username
 ISSUE_REPOSITORY = sys.argv[4]  # Issue Repository Name
-DISCUSSION_NO = sys.argv[4] # Discussion Number
-GITHUB_PERSONAL_ACCESS_TOKEN = sys.argv[5] # Personal Access Token
-WEEK_OFFSET = sys.argv[6] # OFFSET WEEK (Integer)
-
+DISCUSSION_NO = sys.argv[5] # Discussion Number
+GITHUB_PERSONAL_ACCESS_TOKEN = sys.argv[6] # Personal Access Token
+WEEK_OFFSET = int(sys.argv[7]) # OFFSET WEEK (Integer)
 
 # Define a custom sorting key function
 def custom_sort_key(issue):
@@ -72,7 +71,7 @@ headers = {
 # Make the GraphQL request
 response = requests.post(endpoint, json={"query": query}, headers=headers)
 
-# print(response.json())
+print(response.json())
 
 discussion_id = response.json()["data"]["repository"]["discussion"]["id"]
 
@@ -303,28 +302,28 @@ if response.status_code == 200:
     body += "\n- "
 
     print(body)
+    
+    # Create Comment on Discussion Thread
+    query = """
+    mutation {
+    addDiscussionComment(input: {discussionId: "%discussionId%", body: "%BODY%"}) {
+        # response type: Comment
+        comment {
+        id
+        }
+    }
+    }
+    """
 
+    query = query.replace("%discussionId%", discussion_id).replace("%BODY%",body)
+
+    # Make the GraphQL request
+    response = requests.post(endpoint, json={'query': query}, headers=headers)
+
+    print(response.json())
 
 else:
     print(f"Request failed with status code: {response.status_code}")
     print(response.text)
 
 
-# Create Comment on Discussion Thread
-query = """
-mutation {
-  addDiscussionComment(input: {discussionId: "%discussionId%", body: "%BODY%"}) {
-    # response type: Comment
-    comment {
-      id
-    }
-  }
-}
-"""
-
-query = query.replace("%discussionId%", discussion_id).replace("%BODY%",body)
-
-# Make the GraphQL request
-response = requests.post(endpoint, json={'query': query}, headers=headers)
-
-print(response.json())
