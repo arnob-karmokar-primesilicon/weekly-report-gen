@@ -275,12 +275,15 @@ if response.status_code == 200:
                 "Open",
             ])
     ]
- 
+
+    week_start = (datetime.now(pytz.timezone("Asia/Dhaka")) - timedelta(days=7)).strftime("%b %d, %Y")
+    week_end = (datetime.now(pytz.timezone("Asia/Dhaka")) - timedelta(days=1)).strftime("%b %d, %Y")
+    
     # Generate Comment Body
     body = "## Week " + str(
         datetime.now().isocalendar()[1] - WEEK_OFFSET
     )  # get week number
-    body += "\n\n#### " + datetime.now(pytz.timezone("Asia/Dhaka")).strftime("%b %d, %Y")
+    body += "\n\n#### Date: {} to {} ".format(week_start,week_end)
 
     # completed tasks
     body += "\n\n### Completed Task"
